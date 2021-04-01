@@ -1,0 +1,2 @@
+# sopelPlugins
+Plugins para sopel
