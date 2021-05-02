@@ -9,5 +9,7 @@
 * **memories**: Crea un diccionario con tus recuerdos.
 * **rae**: La Real Academia Española desde IRC.
 * **underc0dePosts**: Muestra las publicaciones más recientes de [underc0de](https://underc0de.org/foro)
+* **karma**: Karma para los usuarios.
+* **welcome**: Da un mensaje de bienvenida pseudo-aleatorio.
 
 \~ DtxdF
