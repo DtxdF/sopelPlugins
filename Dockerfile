@@ -12,5 +12,7 @@ COPY modules .
 
 COPY config/default.cfg /home/sopel/.sopel/default.cfg
 
+COPY data/welcome_messages /home/virgilio/.local/etc/virgilio/welcome_messages
+
 USER sopel
 CMD ["sopel"]
