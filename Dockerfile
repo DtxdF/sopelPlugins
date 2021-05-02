@@ -5,6 +5,7 @@ RUN apk add gcc build-base
 RUN addgroup -S sopel && adduser -S sopel -G sopel
 WORKDIR /home/sopel/.sopel/modules
 RUN mkdir /home/sopel/.sopel/data
+RUN mkdir /home/sopel/.sopel/logs
 RUN chown -R sopel:sopel /home/sopel
 
 COPY requirements.txt requirements.txt
