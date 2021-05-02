@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import shlex
@@ -12,7 +13,8 @@ BLOCKLIST_WORDS = (
 	"seen_message",
 	"seen_timestamp"
 )
-BLOCKLIST_RE = repr("|".join(BLOCKLIST_WORDS))
+BLOCKLIST_RE = "|".join(BLOCKLIST_WORDS)
+BLOCKLIST_RE = "(%s)" % (BLOCKLIST_RE)
 
 @module.commands("memories")
 @module.example(".memories <Nombre del recuerdo> [Valor del recuerdo]")
@@ -33,7 +35,7 @@ def memories(bot, trigger):
 		(name,) = args
 
 	if (re.match(BLOCKLIST_RE, name)):
-		boy.say(formatting.color("No se permite este nombre.", colors.YELLOW))
+		bot.say(formatting.color("No se permite este nombre.", colors.YELLOW))
 		return
 
 	if (value is None):
@@ -70,25 +72,39 @@ def delMemories(bot, trigger):
 @module.commands("searchMemories")
 @module.example(".searchMemories <Patrón>")
 def searchMemories(bot, trigger):
-	"""Encontrar recuerdos con una búsqueda (analiza tanto el nombre del recuerdo, como el valor)."""
+    """Encontrar recuerdos con una búsqueda (analiza tanto el nombre del recuerdo, como el valor)."""
 
-	name2search = trigger.group(2)
-	nick = trigger.nick
-	nick_id = bot.db.get_nick_id(nick)
-	query = "SELECT key, value FROM nick_values WHERE nick_id = ?"
-	result = bot.db.execute(query, (nick_id,))
+    name2search = trigger.group(2)
+    
+    if (name2search is None) or not (name2search.strip()):
+        bot.reply(formatting.color("Por favor, escribe una búsqueda.", colors.YELLOW))
+        return
 
-	id = 1
-	for (name, value) in result:
-		if (re.match(BLOCKLIST_RE, name)):
-			continue
+    nick = trigger.nick
+    nick_id = bot.db.get_nick_id(nick)
+    query = "SELECT key, value FROM nick_values WHERE nick_id = ?"
+    result = bot.db.execute(query, (nick_id,))
 
-		exp = "^%s(.*)$" % re.escape(name2search)
-		if (re.match(exp, name)) or (re.search(exp, value)):
-			fmt = FORMAT.format(
-				ID=id,
-				KEY=name,
-				VALUE=value
-			)
-			bot.say(fmt)
-			id += 1
+    id = 0
+    for (name, value) in result:
+        if (re.match(BLOCKLIST_RE, name)):
+            continue
+
+        try:
+            rex = (re.search(name2search, name)) or (re.search(name2search, value))
+        except Exception as err:
+            bot.say(formatting.color("Expresión regular inválida: %s." % err, colors.RED))
+            logging.exception("Error en una expresión regular")
+            return
+
+        if (rex):
+            id += 1
+            fmt = FORMAT.format(
+                ID=id,
+                KEY=name,
+                VALUE=value
+            )
+            bot.say(fmt)
+
+    if (id == 0):
+        bot.reply(formatting.color("Lo siento, pero no tienes recuerdos.", colors.YELLOW))
