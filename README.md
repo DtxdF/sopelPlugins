@@ -11,5 +11,6 @@
 * **underc0dePosts**: Muestra las publicaciones más recientes de [underc0de](https://underc0de.org/foro)
 * **karma**: Karma para los usuarios.
 * **welcome**: Da un mensaje de bienvenida pseudo-aleatorio.
+* **votes**: Sistema de votaciones.
 
 \~ DtxdF
