@@ -1,9 +1,7 @@
 import urllib.parse
 import requests
 from bs4 import BeautifulSoup
-from sopel import formatting
 from sopel import module
-from sopel.formatting import colors
 
 PUBLIC_AREA = "public"
 PRIVATE_AREA = "private"
@@ -35,7 +33,7 @@ def underc0dePosts(bot, trigger):
 		index = DEFAULT_INDEX
 
 	if (index > MAX_POSTS):
-		bot.say(formatting.color("El índice supera el límite permitido", colors.YELLOW))
+		bot.say("El índice supera el límite permitido")
 		return
 
 	if (area == PUBLIC_AREA):
@@ -43,7 +41,7 @@ def underc0dePosts(bot, trigger):
 	elif (area == PRIVATE_AREA):
 		destination = trigger.nick
 	else:
-		bot.say(formatting.color("Por favor, eliga *private* o *public*, y no cualquier otro.", colors.YELLOW))
+		bot.say("Por favor, eliga *private* o *public*, y no cualquier otro.")
 		return
 
 	r = requests.get("https://underc0de.org/foro/index.php?action=recent")

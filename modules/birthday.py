@@ -1,8 +1,6 @@
 import datetime
 import json
 from sopel import module
-from sopel import formatting
-from sopel.formatting import colors
 
 DATE_FORMAT = "%m-%d"
 INTERVAL = 5
@@ -21,13 +19,13 @@ def birthday(bot, trigger):
 		users = json.loads(users)
 
 	if (birthday is None):
-		bot.say(formatting.color("Debe definir la fecha de cumpleaños.", colors.YELLOW))
+		bot.say("Debe definir la fecha de cumpleaños.")
 		return
 
 	try:
 		bd_struct = datetime.datetime.strptime(birthday, DATE_FORMAT)
 	except ValueError:
-		bot.say(formatting.color("La sintaxis de la fecha de cumpleaños no es correcta.", colors.YELLOW))
+		bot.say("La sintaxis de la fecha de cumpleaños no es correcta.")
 		return
 	else:
 		bd_struct = bd_struct.replace(year=cdate.year)
@@ -42,7 +40,7 @@ def birthday(bot, trigger):
 
 	users[nick] = bd_struct.ctime()
 	bot.db.set_plugin_value("birthday", "users", json.dumps(users))
-	bot.say(formatting.color("Avisaré cuando cumplas años :D", colors.GREEN))
+	bot.say("Avisaré cuando cumplas años :D")
 
 @module.interval(INTERVAL)
 def birthday_notice(bot):

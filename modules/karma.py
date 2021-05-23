@@ -2,8 +2,6 @@ import json
 import re
 import time
 from sopel import module
-from sopel import formatting
-from sopel.formatting import colors
 
 KARMA_KEY = "karma"
 KARMA_KEY_INFO = "karma_info"
@@ -18,7 +16,7 @@ def karma(bot, trigger):
     nick = trigger.group(3)
 
     if (nick is None):
-        bot.reply(formatting.color("¡Sigue la sintaxis!", colors.YELLOW))
+        bot.reply("¡Sigue la sintaxis!")
         return
     else:
         nick = nick.lower().strip()
@@ -29,23 +27,23 @@ def karma(bot, trigger):
     elif (is_sum[:1] == "-"):
         is_sum = False
     else:
-        bot.reply(formatting.color("No comprendo qué quieres que haga.", colors.YELLOW))
+        bot.reply("No comprendo qué quieres que haga.")
         return
 
     if (re.match(BLOCKLIST_RE, trigger.nick)):
-        bot.reply(formatting.color("¡No voy a permitir que otorgues karma a este usuario!", colors.YELLOW))
+        bot.reply("¡No voy a permitir que otorgues karma a este usuario!")
         return
 
     if (re.match(BLOCKLIST_RE, nick)):
-        bot.reply(formatting.color("¡No voy a permitir que le des karma!", colors.YELLOW))
+        bot.reply("¡No voy a permitir que le des karma!")
         return
 
     if (nick == trigger.nick.lower()):
-        bot.reply(formatting.color("¡No te puedes dar karma a ti mismo!", colors.YELLOW))
+        bot.reply("¡No te puedes dar karma a ti mismo!")
         return
 
     if not (nick in bot.users):
-        bot.reply(formatting.color("Este usuario no existe o no se encuentra, intenta otra vez.", colors.RED))
+        bot.reply("Este usuario no existe o no se encuentra, intenta otra vez.")
         return
 
     karma_info = bot.db.get_nick_value(nick, KARMA_KEY_INFO)
@@ -72,12 +70,12 @@ def karma(bot, trigger):
 
     bot.db.set_nick_value(nick, KARMA_KEY, karma_val)
     bot.db.set_nick_value(nick, KARMA_KEY_INFO, json.dumps(karma_info))
-    bot.say(formatting.color("%s recibe %s1 de karma de parte de %s. Ahora tiene %d." % (
+    bot.say("%s recibe %s1 de karma de parte de %s. Ahora tiene %d." % (
         nick,
         "+" if (is_sum) else "-",
         trigger.nick,
         karma_val
-    ), colors.LIGHT_GREEN if (is_sum) else colors.YELLOW))
+    ))
 
 @module.commands("getKarma")
 def getKarma(bot, trigger):

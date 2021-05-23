@@ -2,9 +2,7 @@ import logging
 import os
 import re
 import shlex
-from sopel import formatting
 from sopel import module
-from sopel.formatting import colors
 
 FORMAT = "{ID}.- {KEY} - {VALUE}"
 BLOCKLIST_WORDS = (
@@ -25,7 +23,7 @@ def memories(bot, trigger):
 	args = shlex.split(trigger.group(2))[:2]
 
 	if (args == []):
-		bot.say(formatting.color("Por favor, siga la sintaxis.", colors.YELLOW))
+		bot.say("Por favor, siga la sintaxis.")
 		return
 
 	value = None
@@ -35,19 +33,19 @@ def memories(bot, trigger):
 		(name,) = args
 
 	if (re.match(BLOCKLIST_RE, name)):
-		bot.say(formatting.color("No se permite este nombre.", colors.YELLOW))
+		bot.say("No se permite este nombre.")
 		return
 
 	if (value is None):
 		value = bot.db.get_nick_value(nick, name)
 
 		if (value is None):
-			bot.say(formatting.color("El nombre '%s' no existe en tus recuerdos." % (name), colors.YELLOW))
+			bot.say("El nombre '%s' no existe en tus recuerdos." % (name))
 		else:
 			bot.say(value)
 	else:
 		bot.db.set_nick_value(nick, name, value)
-		bot.say(formatting.color("Ahora podrás recordar a '%s'" % (name), colors.GREEN))
+		bot.say("Ahora podrás recordar a '%s'" % (name))
 
 @module.commands("delMemories")
 @module.example(".delMemories <Nombre del recuerdo>")
@@ -58,16 +56,16 @@ def delMemories(bot, trigger):
 	name = trigger.group(2)
 
 	if (re.match(BLOCKLIST_RE, name)):
-		boy.say(formatting.color("No se permite este nombre.", colors.YELLOW))
+		boy.say("No se permite este nombre.")
 		return
 
 	value = bot.db.get_nick_value(nick, name)
 	if (value is None):
-		bot.say(formatting.color("El recuerdo '%s' no existe." % (name), colors.YELLOW))
+		bot.say("El recuerdo '%s' no existe." % (name))
 		return
 
 	bot.db.delete_nick_value(nick, name)
-	bot.say(formatting.color("El recuerdo '%s' se ha borrado." % (name), colors.YELLOW))
+	bot.say("El recuerdo '%s' se ha borrado." % (name))
 
 @module.commands("searchMemories")
 @module.example(".searchMemories <Patrón>")
@@ -77,7 +75,7 @@ def searchMemories(bot, trigger):
     name2search = trigger.group(2)
     
     if (name2search is None) or not (name2search.strip()):
-        bot.reply(formatting.color("Por favor, escribe una búsqueda.", colors.YELLOW))
+        bot.reply("Por favor, escribe una búsqueda.")
         return
 
     nick = trigger.nick
@@ -93,7 +91,7 @@ def searchMemories(bot, trigger):
         try:
             rex = (re.search(name2search, name)) or (re.search(name2search, value))
         except Exception as err:
-            bot.say(formatting.color("Expresión regular inválida: %s." % err, colors.RED))
+            bot.say("Expresión regular inválida: %s." % err)
             logging.exception("Error en una expresión regular")
             return
 
@@ -107,4 +105,4 @@ def searchMemories(bot, trigger):
             bot.say(fmt)
 
     if (id == 0):
-        bot.reply(formatting.color("Lo siento, pero no tienes recuerdos.", colors.YELLOW))
+        bot.reply("Lo siento, pero no tienes recuerdos.")

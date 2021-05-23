@@ -2,9 +2,7 @@ import json
 import re
 import time
 import shlex
-from sopel import formatting
 from sopel import module
-from sopel.formatting import colors
 
 VOTE_FORMAT_SINGLE = "%(id)s) \"%(voteName)s\" propuesta por %(proposer)s en [%(created)s]: Votos: positivos (%(positiveVotes)s) - negativos (%(negativeVotes)s) - Notas: %(note)s"
 VOTE_FORMAT_MULTI = "%(id)s) \"%(voteName)s\" propuesta por %(proposer)s en [%(created)s] - Notas: %(note)s - %(options)s"
@@ -23,7 +21,7 @@ def createVote(bot, trigger):
     args = shlex.split(trigger.group(2))[:3]
 
     if (args == []):
-        bot.reply(formatting.color("Por favor, siga la sintaxis.", colors.YELLOW))
+        bot.reply("Por favor, siga la sintaxis.")
         return
 
     note = None
@@ -44,7 +42,7 @@ def createVote(bot, trigger):
 
     multi_value = {}
     if not (re.match(r"^(single|multi:(.+)+,*)", type)):
-        bot.reply(formattng.color("¡No está siguiendo el formato apropiado!", colors.YELLOW))
+        bot.reply("¡No está siguiendo el formato apropiado!")
         return
     else:
         type_ = type
@@ -54,7 +52,7 @@ def createVote(bot, trigger):
             multi_value_ = [x for x in multi_value_ if (x)]
 
             if (multi_value_ == []):
-                bot.reply(formatting.color("Debes escribir las opciones.", colors.YELLOW))
+                bot.reply("Debes escribir las opciones.")
                 return
 
             multi_value = {}
@@ -66,7 +64,7 @@ def createVote(bot, trigger):
                 }
 
     if (bot.db.get_plugin_value(PLUGIN_NAME, voteName) is not None):
-        bot.reply(formatting.color("La propuesta ya existe.", colors.YELLOW))
+        bot.reply("La propuesta ya existe.")
         return
 
     plugins_info = bot.db.get_plugin_value(PLUGIN_INFO, "list", [])
@@ -87,7 +85,7 @@ def createVote(bot, trigger):
 
     bot.db.set_plugin_value(PLUGIN_NAME, voteName, json.dumps(vote_info))
     bot.db.set_plugin_value(PLUGIN_INFO, "list", json.dumps(plugins_info))
-    bot.reply(formatting.color("La propuesta \"%s\" ha sido creada con éxito." % (voteName), colors.LIGHT_GREEN))
+    bot.reply("La propuesta \"%s\" ha sido creada con éxito." % (voteName))
 
 @module.commands("vote")
 @module.example(".vote <propuesta> <-/+>[Número de la opción]")
@@ -97,7 +95,7 @@ def vote(bot, trigger):
     args = shlex.split(trigger.group(2))[:2]
 
     if (args == []):
-        bot.reply(formatting.color("Por favor, siga la sintaxis.", colors.YELLOW))
+        bot.reply("Por favor, siga la sintaxis.")
         return
 
     pos_or_neg = None
@@ -111,13 +109,13 @@ def vote(bot, trigger):
 
     proposal = bot.db.get_plugin_value(PLUGIN_NAME, voteName)
     if (proposal is None):
-        bot.reply(formatting.color("La propuesta no existe.", colors.YELLOW))
+        bot.reply("La propuesta no existe.")
         return
 
     vote_info = json.loads(proposal)
 
     if (trigger.nick.lower() in vote_info["votes"]):
-        bot.reply(formatting.color("¡Ya votaste, no puedes votar otra vez en esta propuesta!", colors.YELLOW))
+        bot.reply("¡Ya votaste, no puedes votar otra vez en esta propuesta!")
         return
 
     pos_or_neg = option[:1]
@@ -126,7 +124,7 @@ def vote(bot, trigger):
     elif (pos_or_neg == "-"):
         vote_type = "negativeVotes"
     else:
-        bot.reply(formatting.color("¡El voto debe ser positivo o negativo!", colors.RED))
+        bot.reply("¡El voto debe ser positivo o negativo!")
         return
 
     option = option[1:].strip()
@@ -135,12 +133,12 @@ def vote(bot, trigger):
         vote_info[vote_type] += 1
     else:
         if not (option):
-            bot.reply(formatting.color("Es necesario escribir la opción.", colors.YELLOW))
+            bot.reply("Es necesario escribir la opción.")
             return
 
         multi_value = vote_info["multi_value"]
         if (multi_value.get(option) is None):
-            bot.reply(formatting.color("La opción no existe para esta propuesta.", colors.YELLOW))
+            bot.reply("La opción no existe para esta propuesta.")
             return
         else:
             multi_value[option][vote_type] += 1
@@ -149,7 +147,7 @@ def vote(bot, trigger):
     vote_info["votes"].append(trigger.nick.lower())
 
     bot.db.set_plugin_value(PLUGIN_NAME, voteName, json.dumps(vote_info))
-    bot.reply(formatting.color("¡Nos complace que hayas votado!", colors.LIGHT_GREEN))
+    bot.reply("¡Nos complace que hayas votado!")
 
 @module.commands("listVotes")
 @module.example(".listVotes")
@@ -172,13 +170,13 @@ def listVotes(bot, trigger):
             negativeVotes_str = "%d" % (vote_info["negativeVotes"])
 
             bot.say(VOTE_FORMAT_SINGLE % {
-                "id"            : formatting.bold(id_str),
-                "voteName"      : formatting.italic(voteName),
-                "proposer"      : formatting.color(vote_info["proposer"], colors.RED),
-                "created"       : formatting.color(vote_info["created"], colors.YELLOW),
-                "positiveVotes" : formatting.color(positiveVotes_str, colors.LIGHT_BLUE),
-                "negativeVotes" : formatting.color(negativeVotes_str, colors.YELLOW),
-                "note"          : formatting.color(vote_info["note"], colors.WHITE)
+                "id"            : id_str,
+                "voteName"      : voteName,
+                "proposer"      : vote_info["proposer"],
+                "created"       : vote_info["created"],
+                "positiveVotes" : positiveVotes_str,
+                "negativeVotes" : negativeVotes_str,
+                "note"          : vote_info["note"]
             })
         else:
             options = []
@@ -188,24 +186,24 @@ def listVotes(bot, trigger):
                 negativeVotes_str = "%d" % (option_dict["negativeVotes"])
 
                 options.append(MULTI_TEMPLATE % {
-                    "key_id"        : formatting.bold(key_id),
-                    "name"          : formatting.italic(formatting.color(option_dict["name"], colors.RED)),
-                    "positiveVotes" : formatting.color(positiveVotes_str, colors.LIGHT_BLUE),
-                    "negativeVotes" : formatting.color(negativeVotes_str, colors.YELLOW)
+                    "key_id"        : key_id,
+                    "name"          : option_dict["name"],
+                    "positiveVotes" : positiveVotes_str,
+                    "negativeVotes" : negativeVotes_str
                 })
             options_str = ", ".join(options)
 
             bot.say(VOTE_FORMAT_MULTI % {
-                "id"            : formatting.bold(id_str),
-                "voteName"      : formatting.italic(voteName),
-                "proposer"      : formatting.color(vote_info["proposer"], colors.RED),
-                "created"       : formatting.color(vote_info["created"], colors.YELLOW),
-                "note"          : formatting.color(vote_info["note"], colors.WHITE),
+                "id"            : id_str,
+                "voteName"      : voteName,
+                "proposer"      : vote_info["proposer"],
+                "created"       : vote_info["created"],
+                "note"          : vote_info["note"],
                 "options"       : options_str
             })
 
     if (id == 0):
-        bot.reply(formatting.color("Lo siento, pero no hay votaciones.", colors.YELLOW))
+        bot.reply("Lo siento, pero no hay votaciones.")
 
 @module.commands("delVote")
 @module.example(".delVote <Propuesta>")
@@ -215,19 +213,19 @@ def delVote(bot, trigger):
     args = shlex.split(trigger.group(2))[:1]
 
     if (args == []):
-        bot.reply(formatting.color("Por favor, siga la sintaxis.", colors.YELLOW))
+        bot.reply("Por favor, siga la sintaxis.")
         return
     else:
         voteName = args[0]
     
     if (bot.db.get_plugin_value(PLUGIN_NAME, voteName) is None):
-        bot.reply(formatting.color("La propuesta not existe.", colors.YELLOW))
+        bot.reply("La propuesta not existe.")
         return
     else:
         vote_info = json.loads(bot.db.get_plugin_value(PLUGIN_NAME, voteName))
 
         if (trigger.nick.lower() != vote_info["proposer"]):
-            bot.reply(formatting.color("¡No te permito que elimines esta propuesta ya que no la creaste! ¡Fuera!", colors.YELLOW))
+            bot.reply("¡No te permito que elimines esta propuesta ya que no la creaste! ¡Fuera!")
             return
 
     plugins_info = bot.db.get_plugin_value(PLUGIN_INFO, "list")
@@ -236,4 +234,4 @@ def delVote(bot, trigger):
 
     bot.db.delete_plugin_value(PLUGIN_NAME, voteName)
     bot.db.set_plugin_value(PLUGIN_INFO, "list", json.dumps(plugins_info))
-    bot.reply(formatting.color("¡Se ha borrado una propuesta!", colors.YELLOW))
+    bot.reply("¡Se ha borrado una propuesta!")

@@ -1,8 +1,6 @@
 import logging
 import requests
 from sopel import module
-from sopel import formatting
-from sopel.formatting import colors
 
 URL = "https://u.cubeupload.com/{username}/{img_name}"
 
@@ -15,7 +13,7 @@ def cubeupload(bot, trigger):
 	img_name = trigger.group(4)
 
 	if (user is None) or (img_name is None):
-		bot.say(formatting.color("Por favor, escriba el nombre de usuario y de la imagen en cuestión.", colors.YELLOW))
+		bot.say("Por favor, escriba el nombre de usuario y de la imagen en cuestión.")
 	else:
 		img_url = URL.format(
 			username=user,
@@ -25,7 +23,7 @@ def cubeupload(bot, trigger):
 		if (r.status_code == 200):
 			bot.say(img_url)
 		elif (r.status_code == 404):
-			bot.say(formatting.color("Imagen no encontrada.", colors.RED))
+			bot.say("Imagen no encontrada.")
 		else:
-			bot.say(formatting.color("No se qué pasó. Pregunta al administrador.", colors.YELLOW))
+			bot.say("No se qué pasó. Pregunta al administrador.")
 			r.raise_for_status()

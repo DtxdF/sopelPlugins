@@ -3,9 +3,7 @@ import os
 import re
 import requests
 from bs4 import BeautifulSoup
-from sopel import formatting
 from sopel import module
-from sopel.formatting import colors
 
 RAE_URL = "https://dle.rae.es"
 URL = "%s/{word}?m=form" % (RAE_URL)
@@ -26,11 +24,11 @@ def rae_get(bot, trigger):
 	elif (area == PRIVATE_AREA):
 		destination = trigger.nick
 	else:
-		bot.say(formatting.color("Por favor, eliga *private* o *public*, y no cualquier otro.", colors.YELLOW))
+		bot.say("Por favor, eliga *private* o *public*, y no cualquier otro.")
 		return
 
 	if (word is None):
-		bot.say(formatting.color("Por favor, escriba la palabra a buscar.", colors.YELLOW), destination)
+		bot.say("Por favor, escriba la palabra a buscar.", destination)
 		return
 
 	db_word = bot.db.get_plugin_value("rae", word)
@@ -61,11 +59,11 @@ def rae_get(bot, trigger):
 
 		# Si no tiene atributos la etiqueta span, entonces la palabra no existe.
 		if (alphabet_soup.span is None):
-			bot.say(formatting.color("La palabra %s no está en el Diccionario." % (word), colors.RED), destination)
+			bot.say("La palabra %s no está en el Diccionario." % (word), destination)
 			return
 
 		if (alphabet_soup.span.attrs == {}):
-			bot.say(formatting.color("".join(list(alphabet_soup.span.strings)), colors.RED), destination)
+			bot.say("".join(list(alphabet_soup.span.strings)), destination)
 			return
 
 		words = []
